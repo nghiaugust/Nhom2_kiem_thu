@@ -2,13 +2,35 @@
   "name": "nhom2_kiem_thu",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "playwright test",
+    "test:search": "playwright test tests/search-products.spec.js",
+    "test:search-advanced": "playwright test tests/search-advanced.spec.js",
+    "test:search-all": "playwright test tests/search-*.spec.js",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@playwright/test": "^1.53.0",
     "@types/node": "^24.0.1"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nghiaugust/Nhom2_kiem_thu.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nghiaugust/Nhom2_kiem_thu/issues"
+  },
+  "homepage": "https://github.com/nghiaugust/Nhom2_kiem_thu#readme",
+  "description": "",
+  "dependencies": {
+    "playwright": "^1.53.0"
   }
 }
