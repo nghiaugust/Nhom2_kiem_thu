@@ -1,0 +1,220 @@
+// @ts-check
+import { test, expect } from '@playwright/test';
+
+// Sử dụng page của Playwright cho từng test, không dùng pageInstance toàn cục
+
+test.beforeEach(async ({ page }) => {
+  await page.goto('https://newday.com.vn/user/login');
+});
+
+test('Giao diện: Trang hiển thị như lúc đầu khi chưa đăng nhập', async ({ page }) => {
+  await page.fill('input[name="username"]', '');
+  await page.fill('input[name="password"]', '');
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn/user/signin?redirect=/user/login');
+  // Kiểm tra vị trí scroll sau khi báo lỗi
+  const scrollY = await page.evaluate(() => window.scrollY);
+  expect(scrollY).toBeLessThan(50); // Trang không bị kéo xuống dưới
+  // Kiểm tra ô nhập username vẫn hiển thị trên màn hình
+  const usernameBox = await page.locator('input[name="username"]').boundingBox();
+  expect(usernameBox).not.toBeNull();
+  if (usernameBox) expect(usernameBox.y).toBeLessThan(200);
+});
+
+test('Giao diện: Placeholder đúng với logic hệ thống', async ({ page }) => {
+  const usernamePlaceholder = await page.getAttribute('input[name="username"]', 'placeholder');
+  const lower = usernamePlaceholder?.toLowerCase() || '';
+  // Nếu placeholder chứa các từ không hợp lệ thì fail
+  const invalidWords = ['tên đăng nhập', 'username', 'tên tài khoản', 'user'];
+  for (const word of invalidWords) {
+    expect(lower).not.toContain(word);
+  }
+  // Vẫn kiểm tra phải có chữ email
+  expect(lower).toContain('email');
+  const passwordPlaceholder = await page.getAttribute('input[name="password"]', 'placeholder');
+  expect(passwordPlaceholder?.toLowerCase()).toContain('mật khẩu');
+});
+
+test('Giao diện: Nút đăng nhập hiển thị và khả dụng', async ({ page }) => {
+  const btn = page.locator('#btnsignin');
+  await expect(btn).toBeVisible();
+  await expect(btn).toBeEnabled();
+});
+
+test('Giao diện: Tab chuyển đổi giữa các trường hoạt động', async ({ page }) => {
+  await page.focus('input[name="username"]');
+  await page.keyboard.press('Tab');
+  const isPasswordFocused = await page.evaluate(() => document.activeElement && document.activeElement.getAttribute('name') === 'password');
+  expect(isPasswordFocused).toBeTruthy();
+});
+
+test('Giao diện: Placeholder đúng cho ô username và password', async ({ page }) => {
+  const usernamePlaceholder = await page.getAttribute('input[name="username"]', 'placeholder');
+  const passwordPlaceholder = await page.getAttribute('input[name="password"]', 'placeholder');
+  expect(usernamePlaceholder?.toLowerCase()).toContain('email');
+  expect(passwordPlaceholder?.toLowerCase()).toContain('mật khẩu');
+});
+
+test('Giao diện: Logo hoặc tiêu đề trang hiển thị', async ({ page }) => {
+  // Giả sử có logo hoặc tiêu đề với selector phổ biến
+  const logo = page.locator('img[alt*="logo" i], .logo, h1, h2');
+  await expect(logo.first()).toBeVisible();
+});
+
+test('Thiếu username', async ({ page }) => {
+  await page.fill('input[name="username"]', '');
+  await page.fill('input[name="password"]', 'abcdef');
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn/user/signin?redirect=/user/login');
+  await expect(page.locator('div.form-group').nth(0).locator('.formErrorContent')).toBeVisible();
+  // Kiểm tra có alert không
+  const alertVisible = await page.locator('.alert, .alert-danger, .alert-error').isVisible().catch(() => false);
+  if (alertVisible) {
+    expect(alertVisible).toBeTruthy();
+  }
+});
+
+test('Thiếu password', async ({ page }) => {
+  await page.fill('input[name="username"]', 'anhba766@gmail.com');
+  await page.fill('input[name="password"]', '');
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn/user/signin?redirect=/user/login');
+  let errorVisible = false;
+  try {
+    errorVisible = await page.locator('div.form-group').nth(1).locator('.formErrorContent').isVisible({ timeout: 2000 });
+  } catch {}
+  if (!errorVisible) {
+    // Nếu không có lỗi ở trường password, kiểm tra alert tổng
+    const alertVisible = await page.locator('.alert, .alert-danger, .alert-error').isVisible().catch(() => false);
+    expect(alertVisible).toBeTruthy();
+  } else {
+    expect(errorVisible).toBeTruthy();
+  }
+});
+
+test('Thiếu cả hai', async ({ page }) => {
+  await page.fill('input[name="username"]', '');
+  await page.fill('input[name="password"]', '');
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn/user/signin?redirect=/user/login');
+  await expect(page.locator('div.form-group').nth(0).locator('.formErrorContent')).toBeVisible();
+  await expect(page.locator('div.form-group').nth(1).locator('.formErrorContent')).toBeVisible();
+  // Kiểm tra có alert không
+  const alertVisible = await page.locator('.alert, .alert-danger, .alert-error').isVisible().catch(() => false);
+  if (alertVisible) {
+    expect(alertVisible).toBeTruthy();
+  }
+});
+
+test('Đăng nhập sai mật khẩu', async ({ page }) => {
+  await page.fill('input[name="username"]', 'anhba766@gmail.com');
+  await page.fill('input[name="password"]', 'saimatkhau');
+  // Lắng nghe alert bằng Promise
+  const dialogPromise = new Promise(resolve => {
+    page.once('dialog', async dialog => {
+      await dialog.dismiss();
+      resolve(dialog.message());
+    });
+  });
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn/user/signin?redirect=/user/login');
+  const alertMessage = await dialogPromise;
+  expect(alertMessage).toContain('không chính xác');
+});
+
+test('Đăng nhập sai username', async ({ page }) => {
+  await page.fill('input[name="username"]', 'saiuser@gmail.com');
+  await page.fill('input[name="password"]', 'abcdef');
+  const dialogPromise = new Promise(resolve => {
+    page.once('dialog', async dialog => {
+      await dialog.dismiss();
+      resolve(dialog.message());
+    });
+  });
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn/user/signin?redirect=/user/login');
+  const alertMessage = await dialogPromise;
+  expect(alertMessage).toContain('không chính xác');
+});
+
+test('Đăng nhập với password hoa thường lộn xộn, mong đợi có thông báo lỗi', async ({ page }) => {
+  await page.fill('input[name="username"]', 'anhba766@gmail.com');
+  await page.fill('input[name="password"]', 'aBcDeF');
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn/user/signin?redirect=/user/login');
+  // Kiểm tra alert hoặc form error content
+  let alertMessage = '';
+  let errorText = '';
+  const dialogPromise = new Promise(resolve => {
+    page.once('dialog', async dialog => {
+      alertMessage = dialog.message();
+      await dialog.dismiss();
+      resolve(alertMessage);
+    });
+  });
+  await Promise.race([
+    dialogPromise,
+    page.waitForTimeout(2000)
+  ]);
+  if (alertMessage) {
+    expect(alertMessage.toLowerCase()).toMatch(/không chính xác|sai|mật khẩu/);
+  } else {
+    try {
+      const errorLocator = page.locator('.formErrorContent, .alert, .alert-danger, .alert-error');
+      if (await errorLocator.isVisible({ timeout: 2000 })) {
+        errorText = (await errorLocator.innerText()).toLowerCase();
+      }
+    } catch {}
+    expect(errorText).toMatch(/không chính xác|sai|mật khẩu/);
+  }
+});
+
+test('Đăng nhập với username hoa thường lộn xộn', async ({ page }) => {
+  await page.fill('input[name="username"]', 'AnHbA766@GmAil.CoM');
+  await page.fill('input[name="password"]', 'abcdef');
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn');
+});
+
+test('Đăng nhập với cả tài khoản và mật khẩu đều hoa thường lộn xộn, mong đợi có thông báo lỗi', async ({ page }) => {
+  await page.fill('input[name="username"]', 'AnHbA766@GmAil.CoM');
+  await page.fill('input[name="password"]', 'aBcDeF');
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn/user/signin?redirect=/user/login');
+  let alertMessage = '';
+  let errorText = '';
+  const dialogPromise = new Promise(resolve => {
+    page.once('dialog', async dialog => {
+      alertMessage = dialog.message();
+      await dialog.dismiss();
+      resolve(alertMessage);
+    });
+  });
+  await Promise.race([
+    dialogPromise,
+    page.waitForTimeout(2000)
+  ]);
+  if (alertMessage) {
+    expect(alertMessage.toLowerCase()).toMatch(/không chính xác|sai|mật khẩu/);
+  } else {
+    try {
+      const errorLocator = page.locator('.formErrorContent, .alert, .alert-danger, .alert-error');
+      if (await errorLocator.isVisible({ timeout: 2000 })) {
+        errorText = (await errorLocator.innerText()).toLowerCase();
+      }
+    } catch {}
+    expect(errorText).toMatch(/không chính xác|sai|mật khẩu/);
+  }
+});
+
+test('Đăng nhập đúng tài khoản và mật khẩu', async ({ page }) => {
+  await page.fill('input[name="username"]', 'anhba766@gmail.com');
+  await page.fill('input[name="password"]', 'abcdef');
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn', { timeout: 10000 });
+});
+
+
+
+
+
