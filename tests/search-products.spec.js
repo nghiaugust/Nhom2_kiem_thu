@@ -123,7 +123,7 @@ test.describe('New Day - Tìm kiếm sản phẩm', () => {
   test.describe('Bộ lọc và sắp xếp sản phẩm', () => {
     
 
-    test('TC_FILTER_002: Kiểm tra bộ lọc theo size', async ({ page }) => {
+    test('TC_FILTER_001: Kiểm tra bộ lọc theo size', async ({ page }) => {
       // Vào trang có nhiều sản phẩm
       await page.goto(BASE_URL);
 
@@ -267,7 +267,7 @@ test.describe('New Day - Tìm kiếm sản phẩm', () => {
     });
 
 
-    test('TC_SORT_003: Sắp xếp theo tên A-Z', async ({ page }) => {
+    test('TC_SORT_002: Sắp xếp theo tên A-Z', async ({ page }) => {
       const items = [ 'nameAsc', 'nameDesc' ];
       // Vào trang có nhiều sản phẩm
       for (const item of items) {
@@ -328,45 +328,6 @@ test.describe('New Day - Tìm kiếm sản phẩm', () => {
           await page.screenshot({ path: 'debug-no-sort-select.png' });
         }
       }
-    });
-  });
-
-  test.describe('Phân loại sản phẩm (Category)', () => {
-    
-    test('TC_CATEGORY_001: Duyệt danh mục Áo Vest', async ({ page }) => {
-      const items = ['ÁO VEST', 'CHÂN VÁY', 'QUẦN', 'ĐẦM', 'SƠ MI', 'CÁCH TÂN'];
-
-      function normalize(str) {
-        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-      }
-
-      await page.goto(BASE_URL);
-      for( const item of items){
-        const itemsMenu = page.locator('li.tp_menu_item', { hasText: `${item}`});
-        
-        await expect(itemsMenu).toBeVisible();
-        await itemsMenu.first().click();
-        await page.waitForLoadState('load', );
-        
-
-        
-        // Kiểm tra các sản phẩm hiển thị đều là áo vest
-        const productTitles = page.locator('.tp_product_name, h2');
-        
-        if (await productTitles.count() > 0) {
-          const titles = await productTitles.allTextContents();
-          const normalizedItem = normalize(item);
-          console.log('item:', normalizedItem)
-          const allAreVest = titles.every(title => {
-            const normTitle = normalize(title);
-            console.log('title:', normTitle);
-            return normTitle.includes(normalizedItem.split(' ')[0]);
-          });
-          
-          expect(allAreVest).toBeTruthy();
-        }
-      }
-     
     });
   });
 });

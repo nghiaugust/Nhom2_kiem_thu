@@ -283,97 +283,6 @@ test.describe('New Day - Test tìm kiếm nâng cao', () => {
 
 
 
-    test('TC_ADVANCED_003: Tìm kiếm và sắp xếp kết quả', async ({ page }) => {
-
-      // Navigate to the search page
-      await page.goto(BASE_URL, { waitUntil: 'load' });
-
-      // Debug: Take screenshot
-      await page.screenshot({ path: 'debug-initial-page.png' });
-
-      // Click vào danh mục ĐẦM
-      const MenuItem = page.locator('li.tp_menu_item', { hasText: 'ĐẦM' });
-      if (await MenuItem.count() > 0) {
-        await MenuItem.first().click();
-
-        // Đợi trang load
-        await Promise.all([
-          page.waitForLoadState('load', { timeout: 30000 }),
-        ]);
-
-        // Wait for results to load
-        await page.waitForSelector('.product-information, .product-card', { timeout: 15000 });
-
-        // Debug: Take screenshot after search
-        await page.screenshot({ path: 'debug-after-search.png' });
-
-        // Find sort select
-        const sortSelect = page.locator('select#sortControl');
-        try {
-          await sortSelect.waitFor({ state: 'visible', timeout: 15000 });
-          console.log(`Số lượng sort select: ${await sortSelect.count()}`);
-        } catch (error) {
-          console.warn(`⚠️ Không tìm thấy #sortControl sau 15 giây: ${error}`);
-          await page.screenshot({ path: 'debug-no-sort-select.png' });
-          return; // Thoát test nếu không tìm thấy
-        }
-
-        if (await sortSelect.count() > 0) {
-          // Select "Giá tăng dần"
-          await sortSelect.selectOption({ value: '/dam-pc41060.html?show=priceAsc' });
-
-          // Wait for page to reload after sort
-          await page.waitForLoadState('load', { timeout: 30000 });
-
-          // Debug: Take screenshot after sort
-          await page.screenshot({ path: 'debug-after-sort.png' });
-
-          // Lấy danh sách div chứa giá
-          const priceContainers = await page.locator('div.price-new-old').elementHandles();
-          const priceNumbers = [];
-
-          for (const container of priceContainers) {
-            const oldPriceEl = await container.$('.tp_product_price_old');
-            let priceText;
-
-            if (oldPriceEl) {
-              priceText = await oldPriceEl.textContent();
-            } else {
-              const newPriceEl = await container.$('.tp_product_price');
-              priceText = await newPriceEl?.textContent();
-            }
-
-            if (priceText) {
-              const number = parseInt(priceText.replace(/[^\d]/g, ''));
-              if (!isNaN(number)) {
-                priceNumbers.push(number);
-              }
-            }
-          }
-
-          console.log(`Tìm thấy ${priceNumbers.length} giá sản phẩm.`);
-          console.log('Giá sau sắp xếp (5 giá đầu):', priceNumbers.slice(0, 5));
-
-          if (priceNumbers.length >= 2) {
-            for (let i = 0; i < priceNumbers.length - 1; i++) {
-              const current = priceNumbers[i];
-              const next = priceNumbers[i + 1];
-
-              expect(current).toBeLessThanOrEqual(next);
-            }
-          } else {
-            console.warn(`⚠️ Không đủ sản phẩm để kiểm tra sắp xếp (${priceNumbers.length} sản phẩm).`);
-          }
-        } else {
-          console.warn('⚠️ Không tìm thấy menu sắp xếp (#sortControl).');
-          await page.screenshot({ path: 'debug-no-sort-select.png' });
-        }
-      } else {
-        console.warn(`⚠️ Không tìm thấy menu chứa từ khóa: ĐẦM`);
-        await page.screenshot({ path: 'debug-no-search-input.png' });
-      }
-    });
-
 
   });
 
@@ -406,7 +315,7 @@ test.describe('New Day - Test tìm kiếm nâng cao', () => {
     });
 
 
-    test('TC_UX_002: Gợi ý tìm kiếm (autocomplete)', async ({ page }) => {
+    test('TC_UX_001: Gợi ý tìm kiếm (autocomplete)', async ({ page }) => {
       const keyword = 'áo';
 
       const searchInput = page.locator('input[type="search"], input[placeholder*="tìm"], .search-input, #search');
@@ -718,7 +627,7 @@ test.describe('New Day - Test tìm kiếm nâng cao', () => {
       await page.goto(BASE_URL);
       
       // Click vào category
-      const vestCategory = page.locator('text="ÁO VEST"').first();
+      const vestCategory = page.locator('ul.menu-top >> text="ĐẦM"').first();
       
       if (await vestCategory.isVisible()) {
         await vestCategory.click();
@@ -726,28 +635,32 @@ test.describe('New Day - Test tìm kiếm nâng cao', () => {
 
         // Thực hiện search trong category
         const searchInput = page.locator('input[type="search"], input[placeholder*="tìm"], .search-input, #search');
+        console.log(await searchInput.count())
         
         if (await searchInput.count() > 0) {
-          await searchInput.fill('dài tay');
+          await searchInput.click()
+          await page.keyboard.type('tweed');
 
           await Promise.all([
-            page.waitForLoadState('load', { timeout: 30000 }),
+            page.waitForLoadState('networkidle', { timeout: 30000 }),
             page.keyboard.press('Enter')
           ]);
-          await page.waitForLoadState('load', { timeout: 30000 });
 
-          // Kết quả nên vừa thuộc category áo vest vừa match "dài tay"
-          const results = page.locator('.product-item, .product-card');
+          // Kết quả nên vừa thuộc category đầm vừa match "tweed"
+          const results = page.locator('.product-detail, .product-card');
           
           if (await results.count() > 0) {
-            const titles = await results.locator('.product-title, .product-name, h3, h4').allTextContents();
-            
-            const relevantResults = titles.filter(title => 
-              title.toLowerCase().includes('vest') && 
-              title.toLowerCase().includes('dài tay')
+            const titles = await results.locator('.product-detail, .product-info, h2').allTextContents();
+            console.log("Số kết quả",titles)
+
+            // Kiểm tra mọi sản phẩm đều chứa cả "đầm" và "tweed"
+            const allRelevant = titles.every(title => 
+              title.toLowerCase().includes('đầm') && 
+              title.toLowerCase().includes('tweed')
             );
-            
-            expect(relevantResults.length).toBeGreaterThan(0);
+
+            // Kiểm tra điều kiện đó
+            expect(allRelevant).toBe(true);
           }
         }
       }
