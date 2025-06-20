@@ -8,6 +8,7 @@ test.beforeAll(async ({ browser }) => {
   await page.fill('input[name="password"]', 'abcdef');
   await page.click('#btnsignin');
   await expect(page).toHaveURL('https://newday.com.vn');
+   await page.context().storageState({ path: 'auth.json' });
   await page.goto('https://newday.com.vn/profile/changepassword');
 });
 

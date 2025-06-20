@@ -234,6 +234,22 @@ test('ĐN_15: Đăng nhập đúng tài khoản và mật khẩu', async ({ page
   await expect(page).toHaveURL('https://newday.com.vn', { timeout: 10000 });
 });
 
+test('ĐN_16: Đã đăng nhập mà truy cập lại trang login thì không được hiển thị form đăng nhập', async ({ page }) => {
+  // Đăng nhập thành công
+  await page.goto('https://newday.com.vn/user/login');
+  await page.fill('input[name="username"]', 'anhba766@gmail.com');
+  await page.fill('input[name="password"]', 'abcdef');
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn', { timeout: 10000 });
+
+  // Truy cập lại trang login
+  await page.goto('https://newday.com.vn/user/login');
+  // Kiểm tra không còn form đăng nhập (input username hoặc password không còn hiển thị)
+  const usernameVisible = await page.locator('input[name="username"]').isVisible().catch(() => false);
+  const passwordVisible = await page.locator('input[name="password"]').isVisible().catch(() => false);
+  expect(usernameVisible || passwordVisible).toBeFalsy();
+});
+
 
 
 
