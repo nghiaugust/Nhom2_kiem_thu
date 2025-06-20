@@ -207,6 +207,26 @@ test('ĐN_14: Đăng nhập với cả tài khoản và mật khẩu đều hoa 
   }
 });
 
+test('ĐN_14b: Đăng nhập sai tài khoản/mật khẩu quá 5 lần liên tiếp', async ({ page }) => {
+  let lastAlert = '';
+  for (let i = 1; i <= 10; i++) {
+    await page.fill('input[name="username"]', 'saiuser@gmail.com');
+    await page.fill('input[name="password"]', 'saimatkhau');
+    const dialogPromise = new Promise(resolve => {
+      page.once('dialog', async dialog => {
+        await dialog.dismiss();
+        resolve(dialog.message());
+      });
+    });
+    await page.click('#btnsignin');
+    await expect(page).toHaveURL('https://newday.com.vn/user/signin?redirect=/user/login');
+    lastAlert = await dialogPromise;
+    await page.waitForTimeout(500); // Chờ nhỏ giữa các lần thử
+  }
+  // Kiểm tra thông báo lần cuối cùng có thể là bị khóa hoặc cảnh báo vượt quá số lần
+  expect(lastAlert.toLowerCase()).toMatch(/quá số lần|tạm khóa|vượt quá|thử lại/i);
+});
+
 test('ĐN_15: Đăng nhập đúng tài khoản và mật khẩu', async ({ page }) => {
   await page.fill('input[name="username"]', 'anhba766@gmail.com');
   await page.fill('input[name="password"]', 'abcdef');
