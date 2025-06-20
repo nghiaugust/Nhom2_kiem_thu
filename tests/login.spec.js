@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('https://newday.com.vn/user/login');
 });
 
-test('Giao diện: Trang hiển thị như lúc đầu khi chưa đăng nhập', async ({ page }) => {
+test('ĐN_1: Giao diện: Trang hiển thị như lúc đầu khi chưa đăng nhập', async ({ page }) => {
   await page.fill('input[name="username"]', '');
   await page.fill('input[name="password"]', '');
   await page.click('#btnsignin');
@@ -21,7 +21,7 @@ test('Giao diện: Trang hiển thị như lúc đầu khi chưa đăng nhập',
   if (usernameBox) expect(usernameBox.y).toBeLessThan(200);
 });
 
-test('Giao diện: Placeholder đúng với logic hệ thống', async ({ page }) => {
+test('ĐN_2: Giao diện: Placeholder đúng với logic hệ thống', async ({ page }) => {
   const usernamePlaceholder = await page.getAttribute('input[name="username"]', 'placeholder');
   const lower = usernamePlaceholder?.toLowerCase() || '';
   // Nếu placeholder chứa các từ không hợp lệ thì fail
@@ -35,33 +35,33 @@ test('Giao diện: Placeholder đúng với logic hệ thống', async ({ page }
   expect(passwordPlaceholder?.toLowerCase()).toContain('mật khẩu');
 });
 
-test('Giao diện: Nút đăng nhập hiển thị và khả dụng', async ({ page }) => {
+test('ĐN_3: Giao diện: Nút đăng nhập hiển thị và khả dụng', async ({ page }) => {
   const btn = page.locator('#btnsignin');
   await expect(btn).toBeVisible();
   await expect(btn).toBeEnabled();
 });
 
-test('Giao diện: Tab chuyển đổi giữa các trường hoạt động', async ({ page }) => {
+test('ĐN_4: Giao diện: Tab chuyển đổi giữa các trường hoạt động', async ({ page }) => {
   await page.focus('input[name="username"]');
   await page.keyboard.press('Tab');
   const isPasswordFocused = await page.evaluate(() => document.activeElement && document.activeElement.getAttribute('name') === 'password');
   expect(isPasswordFocused).toBeTruthy();
 });
 
-test('Giao diện: Placeholder đúng cho ô username và password', async ({ page }) => {
+test('ĐN_5: Giao diện: Placeholder đúng cho ô username và password', async ({ page }) => {
   const usernamePlaceholder = await page.getAttribute('input[name="username"]', 'placeholder');
   const passwordPlaceholder = await page.getAttribute('input[name="password"]', 'placeholder');
   expect(usernamePlaceholder?.toLowerCase()).toContain('email');
   expect(passwordPlaceholder?.toLowerCase()).toContain('mật khẩu');
 });
 
-test('Giao diện: Logo hoặc tiêu đề trang hiển thị', async ({ page }) => {
+test('ĐN_6: Giao diện: Logo hoặc tiêu đề trang hiển thị', async ({ page }) => {
   // Giả sử có logo hoặc tiêu đề với selector phổ biến
   const logo = page.locator('img[alt*="logo" i], .logo, h1, h2');
   await expect(logo.first()).toBeVisible();
 });
 
-test('Thiếu username', async ({ page }) => {
+test('ĐN_7: Đăng nhập thiếu username', async ({ page }) => {
   await page.fill('input[name="username"]', '');
   await page.fill('input[name="password"]', 'abcdef');
   await page.click('#btnsignin');
@@ -74,7 +74,7 @@ test('Thiếu username', async ({ page }) => {
   }
 });
 
-test('Thiếu password', async ({ page }) => {
+test('ĐN_8: Đăng nhập thiếu password', async ({ page }) => {
   await page.fill('input[name="username"]', 'anhba766@gmail.com');
   await page.fill('input[name="password"]', '');
   await page.click('#btnsignin');
@@ -92,7 +92,7 @@ test('Thiếu password', async ({ page }) => {
   }
 });
 
-test('Thiếu cả hai', async ({ page }) => {
+test('ĐN_9: Đăng nhập Thiếu cả hai', async ({ page }) => {
   await page.fill('input[name="username"]', '');
   await page.fill('input[name="password"]', '');
   await page.click('#btnsignin');
@@ -106,7 +106,7 @@ test('Thiếu cả hai', async ({ page }) => {
   }
 });
 
-test('Đăng nhập sai mật khẩu', async ({ page }) => {
+test('ĐN_10: Đăng nhập sai mật khẩu', async ({ page }) => {
   await page.fill('input[name="username"]', 'anhba766@gmail.com');
   await page.fill('input[name="password"]', 'saimatkhau');
   // Lắng nghe alert bằng Promise
@@ -122,7 +122,7 @@ test('Đăng nhập sai mật khẩu', async ({ page }) => {
   expect(alertMessage).toContain('không chính xác');
 });
 
-test('Đăng nhập sai username', async ({ page }) => {
+test('ĐN_11: Đăng nhập sai email', async ({ page }) => {
   await page.fill('input[name="username"]', 'saiuser@gmail.com');
   await page.fill('input[name="password"]', 'abcdef');
   const dialogPromise = new Promise(resolve => {
@@ -137,7 +137,7 @@ test('Đăng nhập sai username', async ({ page }) => {
   expect(alertMessage).toContain('không chính xác');
 });
 
-test('Đăng nhập với password hoa thường lộn xộn, mong đợi có thông báo lỗi', async ({ page }) => {
+test('ĐN_12: Đăng nhập với password hoa thường lộn xộn, mong đợi có thông báo lỗi', async ({ page }) => {
   await page.fill('input[name="username"]', 'anhba766@gmail.com');
   await page.fill('input[name="password"]', 'aBcDeF');
   await page.click('#btnsignin');
@@ -169,14 +169,14 @@ test('Đăng nhập với password hoa thường lộn xộn, mong đợi có th
   }
 });
 
-test('Đăng nhập với username hoa thường lộn xộn', async ({ page }) => {
+test('ĐN_13: Đăng nhập với username hoa thường lộn xộn', async ({ page }) => {
   await page.fill('input[name="username"]', 'AnHbA766@GmAil.CoM');
   await page.fill('input[name="password"]', 'abcdef');
   await page.click('#btnsignin');
   await expect(page).toHaveURL('https://newday.com.vn');
 });
 
-test('Đăng nhập với cả tài khoản và mật khẩu đều hoa thường lộn xộn, mong đợi có thông báo lỗi', async ({ page }) => {
+test('ĐN_14: Đăng nhập với cả tài khoản và mật khẩu đều hoa thường lộn xộn, mong đợi có thông báo lỗi', async ({ page }) => {
   await page.fill('input[name="username"]', 'AnHbA766@GmAil.CoM');
   await page.fill('input[name="password"]', 'aBcDeF');
   await page.click('#btnsignin');
@@ -207,11 +207,47 @@ test('Đăng nhập với cả tài khoản và mật khẩu đều hoa thườn
   }
 });
 
-test('Đăng nhập đúng tài khoản và mật khẩu', async ({ page }) => {
+test('ĐN_14b: Đăng nhập sai tài khoản/mật khẩu quá 5 lần liên tiếp', async ({ page }) => {
+  let lastAlert = '';
+  for (let i = 1; i <= 10; i++) {
+    await page.fill('input[name="username"]', 'saiuser@gmail.com');
+    await page.fill('input[name="password"]', 'saimatkhau');
+    const dialogPromise = new Promise(resolve => {
+      page.once('dialog', async dialog => {
+        await dialog.dismiss();
+        resolve(dialog.message());
+      });
+    });
+    await page.click('#btnsignin');
+    await expect(page).toHaveURL('https://newday.com.vn/user/signin?redirect=/user/login');
+    lastAlert = await dialogPromise;
+    await page.waitForTimeout(500); // Chờ nhỏ giữa các lần thử
+  }
+  // Kiểm tra thông báo lần cuối cùng có thể là bị khóa hoặc cảnh báo vượt quá số lần
+  expect(lastAlert.toLowerCase()).toMatch(/quá số lần|tạm khóa|vượt quá|thử lại/i);
+});
+
+test('ĐN_15: Đăng nhập đúng tài khoản và mật khẩu', async ({ page }) => {
   await page.fill('input[name="username"]', 'anhba766@gmail.com');
   await page.fill('input[name="password"]', 'abcdef');
   await page.click('#btnsignin');
   await expect(page).toHaveURL('https://newday.com.vn', { timeout: 10000 });
+});
+
+test('ĐN_16: Đã đăng nhập mà truy cập lại trang login thì không được hiển thị form đăng nhập', async ({ page }) => {
+  // Đăng nhập thành công
+  await page.goto('https://newday.com.vn/user/login');
+  await page.fill('input[name="username"]', 'anhba766@gmail.com');
+  await page.fill('input[name="password"]', 'abcdef');
+  await page.click('#btnsignin');
+  await expect(page).toHaveURL('https://newday.com.vn', { timeout: 10000 });
+
+  // Truy cập lại trang login
+  await page.goto('https://newday.com.vn/user/login');
+  // Kiểm tra không còn form đăng nhập (input username hoặc password không còn hiển thị)
+  const usernameVisible = await page.locator('input[name="username"]').isVisible().catch(() => false);
+  const passwordVisible = await page.locator('input[name="password"]').isVisible().catch(() => false);
+  expect(usernameVisible || passwordVisible).toBeFalsy();
 });
 
 
