@@ -428,10 +428,9 @@ test.describe('New Day - Test tìm kiếm nâng cao', () => {
           await searchInput.fill(injection);
 
           await Promise.all([
-          page.waitForLoadState('load', { timeout: 30000 }),
-          page.keyboard.press('Enter')
-        ]);
-        await page.waitForLoadState('load', { timeout: 30000 });
+            page.keyboard.press('Enter'),
+            page.waitForNavigation({ waitUntil: 'load', timeout: 30000 })
+          ]);
 
           // Kiểm tra website vẫn hoạt động bình thường
           await expect(page).toHaveURL(/newday\.com\.vn/);
