@@ -12,9 +12,23 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@playwright/test": "^1.53.0",
     "@types/node": "^24.0.1"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nghiaugust/Nhom2_kiem_thu.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nghiaugust/Nhom2_kiem_thu/issues"
+  },
+  "homepage": "https://github.com/nghiaugust/Nhom2_kiem_thu#readme",
+  "description": "",
+  "dependencies": {
+    "playwright": "^1.53.0"
   }
 }
