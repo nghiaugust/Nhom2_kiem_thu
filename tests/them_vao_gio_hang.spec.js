@@ -30,7 +30,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 
-test('Chọn màu sắc và kích cỡ sản phẩm', async ({ page }) => {
+test('Chọn đủ màu sắc và kích cỡ sản phẩm', async ({ page }) => {
 
   // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
   const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
@@ -52,8 +52,8 @@ test('Chọn màu sắc và kích cỡ sản phẩm', async ({ page }) => {
 
   const cartModal = page.locator('.modal-dialog.modal-lg.cart-modal');
   await expect(cartModal).toBeVisible();
-  
-  await context.storageState({ path: 'state.json' });
+
+  //await context.storageState({ path: 'state.json' });
 });
 
 test('Khi click vào màu đầu tiên, màu đó sẽ được chọn', async ({ page }) => {
@@ -219,12 +219,294 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
 
     console.log('Test Case Nhập ký tự chữ - xử lý đúng.');
   });
-
   test(' Nhập số lượng vượt quá tồn kho', async ({ page }) => {
     const quantityInput = page.locator('input#psQtt'); // Ô nhập số lượng 
 
-    await quantityInput.fill('100'); // max="57" 
-    await expect(quantityInput).toHaveValue('57'); // Giả định tự động điều chỉnh về max 
+    //Sử dụng type() với delay để mô phỏng gõ từng ký tự
+    await quantityInput.clear(); // Xóa giá trị hiện tại trước
+    await quantityInput.type('100', { delay: 200 }); // Delay 200ms giữa mỗi ký tự
+    
+    await expect(quantityInput).toHaveValue('60'); // Giả định tự động điều chỉnh về max 
 
     console.log('Test Case Nhập số lượng vượt quá tồn kho - xử lý đúng.');
+  });
+
+  // Test case validation khi không chọn màu và size
+  test('Không chọn màu và size - bấm Thêm vào giỏ hàng', async ({ page }) => {
+    // Đảm bảo không có màu và size nào được chọn (reset về trạng thái ban đầu)
+    await page.reload();
+      // Kiểm tra nút "Thêm vào giỏ hàng" có tooltip warning
+    const addToCartBtn = page.locator('#js-add-cart');    await expect(addToCartBtn).toBeVisible();
+    
+    // Kiểm tra nút có trạng thái không thể chọn (ck="0")
+    await expect(addToCartBtn).toHaveAttribute('ck', '0');
+    
+    // Kiểm tra có tooltip warning
+    await expect(addToCartBtn).toHaveAttribute('data-original-title', 'Vui lòng chọn màu sắc hoặc kích cỡ');
+    
+    // Kiểm tra title attribute có thể rỗng hoặc không có
+    const titleAttr = await addToCartBtn.getAttribute('title');
+    console.log(`Title attribute: "${titleAttr}"`);
+    
+    // Kiểm tra nút không được enable để thêm vào giỏ hàng
+    const ckValue = await addToCartBtn.getAttribute('ck');
+    expect(ckValue).toBe('0');
+    
+    // Click vào nút và kiểm tra không có hành động gì xảy ra (nút bị disabled)
+    await addToCartBtn.click();
+    
+    // Kiểm tra tooltip vẫn hiển thị thông báo lỗi
+    await expect(addToCartBtn).toHaveAttribute('data-original-title', 'Vui lòng chọn màu sắc hoặc kích cỡ');
+    
+    console.log('Test Case: Không chọn màu và size - bấm Thêm vào giỏ hàng - Hiển thị cảnh báo đúng');
+  });
+
+  test('Không chọn màu và size - bấm Mua ngay', async ({ page }) => {    // Đảm bảo không có màu và size nào được chọn (reset về trạng thái ban đầu)
+    await page.reload();
+    
+    // Kiểm tra nút "Mua ngay"
+    const buyNowBtn = page.locator('#addToCart');
+    await expect(buyNowBtn).toBeVisible();
+    
+    // Kiểm tra nút có trạng thái không thể chọn (ck="0")
+    await expect(buyNowBtn).toHaveAttribute('ck', '0');
+    
+    // Kiểm tra có tooltip warning
+    await expect(buyNowBtn).toHaveAttribute('data-original-title', 'Vui lòng chọn màu sắc hoặc kích cỡ');
+    
+    // Kiểm tra nút không được enable để mua ngay
+    const ckValue = await buyNowBtn.getAttribute('ck');
+    expect(ckValue).toBe('0');
+    
+    // Click vào nút và kiểm tra không có hành động gì xảy ra (nút bị disabled)
+    await buyNowBtn.click();
+    
+    // Kiểm tra tooltip vẫn hiển thị thông báo lỗi
+    await expect(buyNowBtn).toHaveAttribute('data-original-title', 'Vui lòng chọn màu sắc hoặc kích cỡ');
+    
+    console.log('Test Case: Không chọn màu và size - bấm Mua ngay - Hiển thị cảnh báo đúng');
+  });
+
+  test('Chọn màu nhưng không chọn size - bấm Thêm vào giỏ hàng', async ({ page }) => {
+    // Reset về trạng thái ban đầu
+    await page.reload();
+    
+    // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
+    const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
+    await expect(colorOption).toBeVisible();
+    await colorOption.click();
+    
+    // Đảm bảo không chọn size nào
+    // Kiểm tra không có size nào có class "active"
+    const activeSizes = page.locator('span.size.req a.active');
+    await expect(activeSizes).toHaveCount(0);
+      // Kiểm tra nút "Thêm vào giỏ hàng" vẫn hiển thị cảnh báo
+    const addToCartBtn = page.locator('#js-add-cart');    await expect(addToCartBtn).toBeVisible();
+    
+    // Kiểm tra nút vẫn có trạng thái không thể chọn (ck="0") vì chưa chọn size
+    await expect(addToCartBtn).toHaveAttribute('ck', '0');
+    
+    // Kiểm tra vẫn có tooltip warning
+    await expect(addToCartBtn).toHaveAttribute('data-original-title', /Vui lòng chọn màu sắc hoặc kích cỡ/);
+    
+    // Click vào nút và kiểm tra không có hành động gì xảy ra
+    await addToCartBtn.click();
+    
+    // Sau khi click, kiểm tra lại ck vẫn là "0"
+    const ckValueAfterClick = await addToCartBtn.getAttribute('ck');
+    expect(ckValueAfterClick).toBe('0');
+    
+    console.log('Test Case: Chọn màu nhưng không chọn size - bấm Thêm vào giỏ hàng - Hiển thị cảnh báo đúng');
+  });
+
+  test('Chọn màu nhưng không chọn size - bấm Mua ngay', async ({ page }) => {
+    // Reset về trạng thái ban đầu
+    await page.reload();
+    
+    // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
+    const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
+    await expect(colorOption).toBeVisible();
+    await colorOption.click();
+    
+    // Đảm bảo không chọn size nào
+    // Kiểm tra không có size nào có class "active"
+    const activeSizes = page.locator('span.size.req a.active');
+    await expect(activeSizes).toHaveCount(0);    // Kiểm tra nút "Mua ngay" vẫn hiển thị cảnh báo
+    const buyNowBtn = page.locator('#addToCart');
+    await expect(buyNowBtn).toBeVisible();
+    
+    // Kiểm tra nút vẫn có trạng thái không thể chọn (ck="0") vì chưa chọn size
+    await expect(buyNowBtn).toHaveAttribute('ck', '0');
+    
+    // Kiểm tra vẫn có tooltip warning
+    await expect(buyNowBtn).toHaveAttribute('data-original-title', /Vui lòng chọn màu sắc hoặc kích cỡ/);
+    
+    // Click vào nút và kiểm tra không có hành động gì xảy ra
+    await buyNowBtn.click();
+    
+    // Sau khi click, kiểm tra lại ck vẫn là "0"
+    const ckValueAfterClick = await buyNowBtn.getAttribute('ck');
+    expect(ckValueAfterClick).toBe('0');
+    
+    console.log('Test Case: Chọn màu nhưng không chọn size - bấm Mua ngay - Hiển thị cảnh báo đúng');
+  });
+
+  test('Kiểm tra trạng thái nút khi đã chọn đủ màu và size', async ({ page }) => {
+    // Reset về trạng thái ban đầu
+    await page.reload();
+    
+    // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
+    const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
+    await expect(colorOption).toBeVisible();
+    await colorOption.click();
+    
+    // Chọn kích cỡ (ví dụ: chọn size M)
+    const sizeOption = page.locator('span.size.req a', { hasText: 'M' });
+    await expect(sizeOption).toBeVisible();
+    await sizeOption.click({ delay: 500 });
+    
+    // Chờ một chút để UI cập nhật
+    await page.waitForTimeout(1000);
+    
+    // Kiểm tra nút "Thêm vào giỏ hàng" đã được kích hoạt
+    const addToCartBtn = page.locator('#js-add-cart');
+    await expect(addToCartBtn).toBeVisible();
+    
+    // Kiểm tra nút có trạng thái có thể chọn (ck="1")
+    await expect(addToCartBtn).toHaveAttribute('ck', '1');
+    
+    // Kiểm tra không còn tooltip warning (không có data-original-title với nội dung cảnh báo)
+    const originalTitleAttr = await addToCartBtn.getAttribute('data-original-title');
+    // Có thể là null hoặc không chứa thông báo cảnh báo
+    if (originalTitleAttr) {
+      expect(originalTitleAttr).not.toContain(/Vui lòng chọn/);
+    }
+    
+    // Kiểm tra nút "Mua ngay" cũng được kích hoạt
+    const buyNowBtn = page.locator('#addToCart');
+    await expect(buyNowBtn).toBeVisible();
+    await expect(buyNowBtn).toHaveAttribute('ck', '1');
+    
+    console.log('Test Case: Đã chọn đủ màu và size - Nút được kích hoạt (ck="1")');
+  });
+
+  test('Kiểm tra modal hiển thị sau khi thêm vào giỏ hàng - Bấm "Tiếp tục mua hàng"', async ({ page }) => {
+    
+    // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
+    const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
+    await expect(colorOption).toBeVisible();
+    await colorOption.click();
+    
+    // Chọn kích cỡ (ví dụ: chọn size M)
+    const sizeOption = page.locator('span.size.req a', { hasText: 'M' });
+    await expect(sizeOption).toBeVisible();
+    await sizeOption.click({ delay: 500 });
+    
+    // Chờ nút được kích hoạt
+    await page.waitForTimeout(1000);
+    
+    // Kiểm tra modal backdrop không có trước khi thêm vào giỏ hàng
+    const modalBackdropBefore = page.locator('.modal-backdrop.fade.in');
+    await expect(modalBackdropBefore).toHaveCount(0);
+    
+    // Click nút "Thêm vào giỏ hàng"
+    const addToCartBtn = page.locator('#js-add-cart');
+    await expect(addToCartBtn).toHaveAttribute('ck', '1');
+    await addToCartBtn.click();
+    
+    // Chờ modal hiển thị
+    await page.waitForTimeout(1000);
+      // Kiểm tra modal backdrop đã xuất hiện
+    const modalBackdropAfter = page.locator('.modal-backdrop.fade.in');
+    await expect(modalBackdropAfter).toBeVisible();
+    console.log('Modal đã hiển thị với backdrop');
+    
+    // Kiểm tra 2 nút trong modal hiển thị
+    const continueShopping = page.locator('#close-modal');
+    const checkoutNow = page.locator('a[href="/cart/checkout"].btn.btn-success');
+    
+    await expect(continueShopping).toBeVisible();
+    await expect(continueShopping).toContainText('Tiếp tục mua hàng');
+    
+    await expect(checkoutNow).toBeVisible();
+    await expect(checkoutNow).toContainText('Thanh toán ngay');
+    
+    console.log('Cả 2 nút trong modal đều hiển thị đúng');
+    
+    // Click "Tiếp tục mua hàng"
+    await continueShopping.click();
+    
+    // Chờ modal đóng
+    await page.waitForTimeout(1000);
+    
+    // Kiểm tra modal backdrop đã biến mất
+    const modalBackdropClosed = page.locator('.modal-backdrop.fade.in');
+    await expect(modalBackdropClosed).toHaveCount(0);
+    console.log('Modal đã đóng - backdrop không còn hiển thị');
+    
+    // Kiểm tra vẫn ở trang hiện tại (không chuyển trang)
+    await expect(page).toHaveURL(/quan-suong-dai-2-lop-soda/);
+    console.log('Test Case: Bấm "Tiếp tục mua hàng" - Modal đóng và không chuyển trang');
+  });
+
+  test('Kiểm tra modal hiển thị sau khi thêm vào giỏ hàng - Bấm "Thanh toán ngay"', async ({ page }) => {
+    // Reset và chọn đủ màu, size
+    await page.reload();
+    
+    // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
+    const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
+    await expect(colorOption).toBeVisible();
+    await colorOption.click();
+    
+    // Chọn kích cỡ (ví dụ: chọn size M)
+    const sizeOption = page.locator('span.size.req a', { hasText: 'M' });
+    await expect(sizeOption).toBeVisible();
+    await sizeOption.click({ delay: 500 });
+    
+    // Chờ nút được kích hoạt
+    await page.waitForTimeout(1000);
+    
+    // Kiểm tra modal backdrop không có trước khi thêm vào giỏ hàng
+    const modalBackdropBefore = page.locator('.modal-backdrop.fade.in');
+    await expect(modalBackdropBefore).toHaveCount(0);
+    
+    // Click nút "Thêm vào giỏ hàng"
+    const addToCartBtn = page.locator('#js-add-cart');
+    await expect(addToCartBtn).toHaveAttribute('ck', '1');
+    await addToCartBtn.click();
+    
+    // Chờ modal hiển thị
+    await page.waitForTimeout(2000);
+    
+    // Kiểm tra modal backdrop đã xuất hiện
+    const modalBackdropAfter = page.locator('.modal-backdrop.fade.in');
+    await expect(modalBackdropAfter).toBeVisible();
+    console.log('Modal đã hiển thị với backdrop');    
+    // Kiểm tra 2 nút trong modal hiển thị
+    const continueShopping = page.locator('#close-modal');
+    const checkoutNow = page.locator('a[href="/cart/checkout"].btn.btn-success');
+    
+    await expect(continueShopping).toBeVisible();
+    await expect(continueShopping).toContainText('Tiếp tục mua hàng');
+    
+    await expect(checkoutNow).toBeVisible();
+    await expect(checkoutNow).toContainText('Thanh toán ngay');
+    
+    console.log('Cả 2 nút trong modal đều hiển thị đúng');
+    
+    // Click "Thanh toán ngay"
+    await checkoutNow.click();
+    
+    // Chờ chuyển trang
+    await page.waitForTimeout(2000);
+    
+    // Kiểm tra đã chuyển đến trang checkout
+    await expect(page).toHaveURL('https://newday.com.vn/cart/checkout');
+    console.log('Đã chuyển đến trang thanh toán thành công');
+    
+    // Kiểm tra modal backdrop không còn (vì đã chuyển trang)
+    const modalBackdropAfterCheckout = page.locator('.modal-backdrop.fade.in');
+    await expect(modalBackdropAfterCheckout).toHaveCount(0);
+    
+    console.log('Test Case: Bấm "Thanh toán ngay" - Chuyển đến trang checkout thành công');
   });
