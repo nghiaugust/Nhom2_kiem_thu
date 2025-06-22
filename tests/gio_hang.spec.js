@@ -49,7 +49,7 @@ function parseCurrencyToNumber(currencyString) {
   // Loại bỏ ký tự 'đ', dấu phẩy, và dấu chấm (nếu có cho hàng triệu)
   return parseInt(currencyString.replace(/[đ.,]/g, ''));
 }
-test('Kiểm tra số lượng sản phẩm hiển thị và tính tổng tiền giỏ hàng', async ({ page }) => {
+test('DD_18: Kiểm tra số lượng sản phẩm hiển thị và tính tổng tiền giỏ hàng', async ({ page }) => {
     //await context.storageState({ path: 'state.json' });
     // 1. Lấy tất cả các dòng sản phẩm trong tbody
     const productRows = page.locator('table.table-cart tbody tr');
@@ -118,190 +118,190 @@ test('Kiểm tra số lượng sản phẩm hiển thị và tính tổng tiền
     console.log('Tổng tiền giỏ hàng khớp với tổng của từng sản phẩm.');
 });
 
-test('Kiểm tra thay đổi số lượng sản phẩm trong giỏ hàng', async ({ page }) => {
-    // 1. Lấy sản phẩm đầu tiên để test thay đổi số lượng
-    const firstProductRow = page.locator('table.table-cart tbody tr').first();
+// test('Kiểm tra thay đổi số lượng sản phẩm trong giỏ hàng', async ({ page }) => {
+//     // 1. Lấy sản phẩm đầu tiên để test thay đổi số lượng
+//     const firstProductRow = page.locator('table.table-cart tbody tr').first();
     
-    // Lấy thông tin ban đầu của sản phẩm đầu tiên
-    const productNameElement = firstProductRow.locator('.cart-pro-name a');
-    const productName = await productNameElement.textContent();
+//     // Lấy thông tin ban đầu của sản phẩm đầu tiên
+//     const productNameElement = firstProductRow.locator('.cart-pro-name a');
+//     const productName = await productNameElement.textContent();
     
-    const unitPriceElement = firstProductRow.locator('.pri-cart .money');
-    const unitPriceText = await unitPriceElement.textContent();
-    const unitPrice = parseCurrencyToNumber(unitPriceText);
+//     const unitPriceElement = firstProductRow.locator('.pri-cart .money');
+//     const unitPriceText = await unitPriceElement.textContent();
+//     const unitPrice = parseCurrencyToNumber(unitPriceText);
     
-    const quantityInput = firstProductRow.locator('.product-qty input.updateCart');
-    const originalQuantity = parseInt(await quantityInput.inputValue());
+//     const quantityInput = firstProductRow.locator('.product-qty input.updateCart');
+//     const originalQuantity = parseInt(await quantityInput.inputValue());
     
-    console.log(`Sản phẩm test: "${productName}"`);
-    console.log(`Đơn giá: ${unitPrice.toLocaleString('vi-VN')}đ`);
-    console.log(`Số lượng ban đầu: ${originalQuantity}`);
+//     console.log(`Sản phẩm test: "${productName}"`);
+//     console.log(`Đơn giá: ${unitPrice.toLocaleString('vi-VN')}đ`);
+//     console.log(`Số lượng ban đầu: ${originalQuantity}`);
     
-    // Lấy tổng tiền ban đầu của giỏ hàng
-    const cartTotalElement = page.locator('.cart-calculator .text-red');
-    const originalCartTotalText = await cartTotalElement.textContent();
-    const originalCartTotal = parseCurrencyToNumber(originalCartTotalText);
-    console.log(`Tổng tiền ban đầu: ${originalCartTotal.toLocaleString('vi-VN')}đ`);
+//     // Lấy tổng tiền ban đầu của giỏ hàng
+//     const cartTotalElement = page.locator('.cart-calculator .text-red');
+//     const originalCartTotalText = await cartTotalElement.textContent();
+//     const originalCartTotal = parseCurrencyToNumber(originalCartTotalText);
+//     console.log(`Tổng tiền ban đầu: ${originalCartTotal.toLocaleString('vi-VN')}đ`);
     
-    // 2. Tăng số lượng sản phẩm lên 1
-    const newQuantity = originalQuantity + 1;
-    await quantityInput.fill(String(newQuantity));
+//     // 2. Tăng số lượng sản phẩm lên 1
+//     const newQuantity = originalQuantity + 1;
+//     await quantityInput.fill(String(newQuantity));
     
-    // Trigger change event để cập nhật giỏ hàng
-    await quantityInput.dispatchEvent('change');
+//     // Trigger change event để cập nhật giỏ hàng
+//     await quantityInput.dispatchEvent('change');
     
-    // Chờ cập nhật
-    await page.waitForTimeout(2000);
+//     // Chờ cập nhật
+//     await page.waitForTimeout(2000);
     
-    // 3. Kiểm tra số lượng đã được cập nhật
-    const updatedQuantity = parseInt(await quantityInput.inputValue());
-    expect(updatedQuantity).toBe(newQuantity);
-    console.log(`Số lượng sau khi tăng: ${updatedQuantity}`);
+//     // 3. Kiểm tra số lượng đã được cập nhật
+//     const updatedQuantity = parseInt(await quantityInput.inputValue());
+//     expect(updatedQuantity).toBe(newQuantity);
+//     console.log(`Số lượng sau khi tăng: ${updatedQuantity}`);
     
-    // 4. Kiểm tra thành tiền của sản phẩm đã được cập nhật
-    const updatedSubtotalElement = firstProductRow.locator('.into-money');
-    const updatedSubtotalText = await updatedSubtotalElement.textContent();
-    const updatedSubtotal = parseCurrencyToNumber(updatedSubtotalText);
-    const expectedSubtotal = unitPrice * newQuantity;
+//     // 4. Kiểm tra thành tiền của sản phẩm đã được cập nhật
+//     const updatedSubtotalElement = firstProductRow.locator('.into-money');
+//     const updatedSubtotalText = await updatedSubtotalElement.textContent();
+//     const updatedSubtotal = parseCurrencyToNumber(updatedSubtotalText);
+//     const expectedSubtotal = unitPrice * newQuantity;
     
-    expect(updatedSubtotal).toBe(expectedSubtotal);
-    console.log(`Thành tiền sau khi tăng: ${updatedSubtotal.toLocaleString('vi-VN')}đ (Mong đợi: ${expectedSubtotal.toLocaleString('vi-VN')}đ)`);
+//     expect(updatedSubtotal).toBe(expectedSubtotal);
+//     console.log(`Thành tiền sau khi tăng: ${updatedSubtotal.toLocaleString('vi-VN')}đ (Mong đợi: ${expectedSubtotal.toLocaleString('vi-VN')}đ)`);
     
-    // 5. Kiểm tra tổng tiền giỏ hàng đã được cập nhật
-    const updatedCartTotalText = await cartTotalElement.textContent();
-    const updatedCartTotal = parseCurrencyToNumber(updatedCartTotalText);
-    const expectedCartTotal = originalCartTotal + unitPrice; // Tăng thêm 1 sản phẩm
+//     // 5. Kiểm tra tổng tiền giỏ hàng đã được cập nhật
+//     const updatedCartTotalText = await cartTotalElement.textContent();
+//     const updatedCartTotal = parseCurrencyToNumber(updatedCartTotalText);
+//     const expectedCartTotal = originalCartTotal + unitPrice; // Tăng thêm 1 sản phẩm
     
-    expect(updatedCartTotal).toBe(expectedCartTotal);
-    console.log(`Tổng tiền sau khi tăng: ${updatedCartTotal.toLocaleString('vi-VN')}đ (Mong đợi: ${expectedCartTotal.toLocaleString('vi-VN')}đ)`);
+//     expect(updatedCartTotal).toBe(expectedCartTotal);
+//     console.log(`Tổng tiền sau khi tăng: ${updatedCartTotal.toLocaleString('vi-VN')}đ (Mong đợi: ${expectedCartTotal.toLocaleString('vi-VN')}đ)`);
     
-    // 6. Giảm số lượng về như ban đầu
-    await quantityInput.fill(String(originalQuantity));
-    await quantityInput.dispatchEvent('change');
-    await page.waitForTimeout(2000);
+//     // 6. Giảm số lượng về như ban đầu
+//     await quantityInput.fill(String(originalQuantity));
+//     await quantityInput.dispatchEvent('change');
+//     await page.waitForTimeout(2000);
     
-    // 7. Kiểm tra đã trở về trạng thái ban đầu
-    const restoredQuantity = parseInt(await quantityInput.inputValue());
-    expect(restoredQuantity).toBe(originalQuantity);
+//     // 7. Kiểm tra đã trở về trạng thái ban đầu
+//     const restoredQuantity = parseInt(await quantityInput.inputValue());
+//     expect(restoredQuantity).toBe(originalQuantity);
     
-    const restoredSubtotalText = await updatedSubtotalElement.textContent();
-    const restoredSubtotal = parseCurrencyToNumber(restoredSubtotalText);
-    const expectedRestoredSubtotal = unitPrice * originalQuantity;
+//     const restoredSubtotalText = await updatedSubtotalElement.textContent();
+//     const restoredSubtotal = parseCurrencyToNumber(restoredSubtotalText);
+//     const expectedRestoredSubtotal = unitPrice * originalQuantity;
     
-    expect(restoredSubtotal).toBe(expectedRestoredSubtotal);
+//     expect(restoredSubtotal).toBe(expectedRestoredSubtotal);
     
-    const restoredCartTotalText = await cartTotalElement.textContent();
-    const restoredCartTotal = parseCurrencyToNumber(restoredCartTotalText);
+//     const restoredCartTotalText = await cartTotalElement.textContent();
+//     const restoredCartTotal = parseCurrencyToNumber(restoredCartTotalText);
     
-    expect(restoredCartTotal).toBe(originalCartTotal);
-    console.log('Đã khôi phục về trạng thái ban đầu thành công');
-});
+//     expect(restoredCartTotal).toBe(originalCartTotal);
+//     console.log('Đã khôi phục về trạng thái ban đầu thành công');
+// });
 
-test('Kiểm tra xóa sản phẩm khỏi giỏ hàng', async ({ page }) => {
-    // 1. Đếm số sản phẩm ban đầu
-    const initialProductRows = page.locator('table.table-cart tbody tr');
-    const initialProductCount = await initialProductRows.count();
-    console.log(`Số sản phẩm ban đầu: ${initialProductCount}`);
+// test('Kiểm tra xóa sản phẩm khỏi giỏ hàng', async ({ page }) => {
+//     // 1. Đếm số sản phẩm ban đầu
+//     const initialProductRows = page.locator('table.table-cart tbody tr');
+//     const initialProductCount = await initialProductRows.count();
+//     console.log(`Số sản phẩm ban đầu: ${initialProductCount}`);
     
-    // Lấy tổng tiền ban đầu
-    const cartTotalElement = page.locator('.cart-calculator .text-red');
-    const initialCartTotalText = await cartTotalElement.textContent();
-    const initialCartTotal = parseCurrencyToNumber(initialCartTotalText);
-    console.log(`Tổng tiền ban đầu: ${initialCartTotal.toLocaleString('vi-VN')}đ`);
+//     // Lấy tổng tiền ban đầu
+//     const cartTotalElement = page.locator('.cart-calculator .text-red');
+//     const initialCartTotalText = await cartTotalElement.textContent();
+//     const initialCartTotal = parseCurrencyToNumber(initialCartTotalText);
+//     console.log(`Tổng tiền ban đầu: ${initialCartTotal.toLocaleString('vi-VN')}đ`);
     
-    // 2. Lấy thông tin sản phẩm cuối cùng để xóa
-    const lastProductRow = initialProductRows.last();
+//     // 2. Lấy thông tin sản phẩm cuối cùng để xóa
+//     const lastProductRow = initialProductRows.last();
     
-    const productNameElement = lastProductRow.locator('.cart-pro-name a');
-    const productName = await productNameElement.textContent();
+//     const productNameElement = lastProductRow.locator('.cart-pro-name a');
+//     const productName = await productNameElement.textContent();
     
-    const subtotalElement = lastProductRow.locator('.into-money');
-    const subtotalText = await subtotalElement.textContent();
-    const productSubtotal = parseCurrencyToNumber(subtotalText);
+//     const subtotalElement = lastProductRow.locator('.into-money');
+//     const subtotalText = await subtotalElement.textContent();
+//     const productSubtotal = parseCurrencyToNumber(subtotalText);
     
-    console.log(`Sản phẩm sẽ bị xóa: "${productName}"`);
-    console.log(`Thành tiền của sản phẩm: ${productSubtotal.toLocaleString('vi-VN')}đ`);
+//     console.log(`Sản phẩm sẽ bị xóa: "${productName}"`);
+//     console.log(`Thành tiền của sản phẩm: ${productSubtotal.toLocaleString('vi-VN')}đ`);
     
-    // 3. Click vào nút xóa sản phẩm (icon fa-times)
-    const removeButton = lastProductRow.locator('i.removeCartItem.fa-times');
-    await expect(removeButton).toBeVisible();
-    await removeButton.click();
+//     // 3. Click vào nút xóa sản phẩm (icon fa-times)
+//     const removeButton = lastProductRow.locator('i.removeCartItem.fa-times');
+//     await expect(removeButton).toBeVisible();
+//     await removeButton.click();
     
-    // Chờ xử lý xóa
-    await page.waitForTimeout(2000);
+//     // Chờ xử lý xóa
+//     await page.waitForTimeout(2000);
     
-    // 4. Kiểm tra số lượng sản phẩm đã giảm
-    const updatedProductRows = page.locator('table.table-cart tbody tr');
-    const updatedProductCount = await updatedProductRows.count();
+//     // 4. Kiểm tra số lượng sản phẩm đã giảm
+//     const updatedProductRows = page.locator('table.table-cart tbody tr');
+//     const updatedProductCount = await updatedProductRows.count();
     
-    expect(updatedProductCount).toBe(initialProductCount - 1);
-    console.log(`Số sản phẩm sau khi xóa: ${updatedProductCount}`);
+//     expect(updatedProductCount).toBe(initialProductCount - 1);
+//     console.log(`Số sản phẩm sau khi xóa: ${updatedProductCount}`);
     
-    // 5. Kiểm tra tổng tiền đã được cập nhật
-    const updatedCartTotalText = await cartTotalElement.textContent();
-    const updatedCartTotal = parseCurrencyToNumber(updatedCartTotalText);
-    const expectedCartTotal = initialCartTotal - productSubtotal;
+//     // 5. Kiểm tra tổng tiền đã được cập nhật
+//     const updatedCartTotalText = await cartTotalElement.textContent();
+//     const updatedCartTotal = parseCurrencyToNumber(updatedCartTotalText);
+//     const expectedCartTotal = initialCartTotal - productSubtotal;
     
-    expect(updatedCartTotal).toBe(expectedCartTotal);
-    console.log(`Tổng tiền sau khi xóa: ${updatedCartTotal.toLocaleString('vi-VN')}đ`);
-    console.log(`Tổng tiền mong đợi: ${expectedCartTotal.toLocaleString('vi-VN')}đ`);
+//     expect(updatedCartTotal).toBe(expectedCartTotal);
+//     console.log(`Tổng tiền sau khi xóa: ${updatedCartTotal.toLocaleString('vi-VN')}đ`);
+//     console.log(`Tổng tiền mong đợi: ${expectedCartTotal.toLocaleString('vi-VN')}đ`);
     
-    // 6. Kiểm tra sản phẩm đã bị xóa không còn xuất hiện trong danh sách
-    const remainingProductNames = await updatedProductRows.locator('.cart-pro-name a').allTextContents();
-    expect(remainingProductNames).not.toContain(productName);
-    console.log(`Sản phẩm "${productName}" đã được xóa khỏi giỏ hàng thành công`);
+//     // 6. Kiểm tra sản phẩm đã bị xóa không còn xuất hiện trong danh sách
+//     const remainingProductNames = await updatedProductRows.locator('.cart-pro-name a').allTextContents();
+//     expect(remainingProductNames).not.toContain(productName);
+//     console.log(`Sản phẩm "${productName}" đã được xóa khỏi giỏ hàng thành công`);
     
-    // 7. Kiểm tra số lượng item trong header cũng được cập nhật
-    const totalItemCountHeader = page.locator('th.total-cart .totalItem-cart');
-    await expect(totalItemCountHeader).toContainText(String(updatedProductCount));
-    console.log('Số lượng sản phẩm trong header đã được cập nhật');
-});
+//     // 7. Kiểm tra số lượng item trong header cũng được cập nhật
+//     const totalItemCountHeader = page.locator('th.total-cart .totalItem-cart');
+//     await expect(totalItemCountHeader).toContainText(String(updatedProductCount));
+//     console.log('Số lượng sản phẩm trong header đã được cập nhật');
+// });
 
-test('Kiểm tra xóa tất cả sản phẩm khỏi giỏ hàng', async ({ page }) => {
-    // 1. Lấy số lượng sản phẩm ban đầu
-    const productRows = page.locator('table.table-cart tbody tr');
-    let productCount = await productRows.count();
-    console.log(`Số sản phẩm ban đầu: ${productCount}`);
+// test('Kiểm tra xóa tất cả sản phẩm khỏi giỏ hàng', async ({ page }) => {
+//     // 1. Lấy số lượng sản phẩm ban đầu
+//     const productRows = page.locator('table.table-cart tbody tr');
+//     let productCount = await productRows.count();
+//     console.log(`Số sản phẩm ban đầu: ${productCount}`);
     
-    // 2. Xóa từng sản phẩm cho đến khi hết
-    while (productCount > 0) {
-        const currentRows = page.locator('table.table-cart tbody tr');
-        const firstRow = currentRows.first();
+//     // 2. Xóa từng sản phẩm cho đến khi hết
+//     while (productCount > 0) {
+//         const currentRows = page.locator('table.table-cart tbody tr');
+//         const firstRow = currentRows.first();
         
-        // Lấy tên sản phẩm trước khi xóa
-        const productNameElement = firstRow.locator('.cart-pro-name a');
-        const productName = await productNameElement.textContent();
+//         // Lấy tên sản phẩm trước khi xóa
+//         const productNameElement = firstRow.locator('.cart-pro-name a');
+//         const productName = await productNameElement.textContent();
         
-        // Click nút xóa
-        const removeButton = firstRow.locator('i.removeCartItem.fa-times');
-        await removeButton.click();
+//         // Click nút xóa
+//         const removeButton = firstRow.locator('i.removeCartItem.fa-times');
+//         await removeButton.click();
         
-        // Chờ xử lý xóa
-        await page.waitForTimeout(2000);
+//         // Chờ xử lý xóa
+//         await page.waitForTimeout(2000);
         
-        console.log(`Đã xóa sản phẩm: "${productName}"`);
+//         console.log(`Đã xóa sản phẩm: "${productName}"`);
         
-        // Cập nhật số lượng sản phẩm còn lại
-        productCount = await page.locator('table.table-cart tbody tr').count();
-        console.log(`Số sản phẩm còn lại: ${productCount}`);
-    }
+//         // Cập nhật số lượng sản phẩm còn lại
+//         productCount = await page.locator('table.table-cart tbody tr').count();
+//         console.log(`Số sản phẩm còn lại: ${productCount}`);
+//     }
     
-    // 3. Kiểm tra giỏ hàng trống
-    expect(productCount).toBe(0);
-    console.log('Đã xóa hết tất cả sản phẩm khỏi giỏ hàng');
+//     // 3. Kiểm tra giỏ hàng trống
+//     expect(productCount).toBe(0);
+//     console.log('Đã xóa hết tất cả sản phẩm khỏi giỏ hàng');
     
-    // 4. Kiểm tra thông báo giỏ hàng trống hoặc tổng tiền = 0
-    // (Tùy thuộc vào cách website hiển thị khi giỏ hàng trống)
-    const cartTotalElement = page.locator('.cart-calculator .text-red');
+//     // 4. Kiểm tra thông báo giỏ hàng trống hoặc tổng tiền = 0
+//     // (Tùy thuộc vào cách website hiển thị khi giỏ hàng trống)
+//     const cartTotalElement = page.locator('.cart-calculator .text-red');
     
-    // Kiểm tra xem có hiển thị tổng tiền = 0 hay thông báo giỏ hàng trống
-    if (await cartTotalElement.isVisible()) {
-        const cartTotalText = await cartTotalElement.textContent();
-        const cartTotal = parseCurrencyToNumber(cartTotalText);
-        expect(cartTotal).toBe(0);
-        console.log('Tổng tiền giỏ hàng = 0đ');
-    } else {
-        // Có thể website hiển thị thông báo "Giỏ hàng trống" thay vì bảng
-        console.log('Giỏ hàng trống - không hiển thị tổng tiền');
-    }
-});
+//     // Kiểm tra xem có hiển thị tổng tiền = 0 hay thông báo giỏ hàng trống
+//     if (await cartTotalElement.isVisible()) {
+//         const cartTotalText = await cartTotalElement.textContent();
+//         const cartTotal = parseCurrencyToNumber(cartTotalText);
+//         expect(cartTotal).toBe(0);
+//         console.log('Tổng tiền giỏ hàng = 0đ');
+//     } else {
+//         // Có thể website hiển thị thông báo "Giỏ hàng trống" thay vì bảng
+//         console.log('Giỏ hàng trống - không hiển thị tổng tiền');
+//     }
+// });

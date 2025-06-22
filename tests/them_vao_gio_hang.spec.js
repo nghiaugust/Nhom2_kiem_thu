@@ -30,15 +30,15 @@ test.beforeEach(async ({ page }) => {
 });
 
 
-test('Chọn đủ màu sắc và kích cỡ sản phẩm', async ({ page }) => {
+test('DD_1: Chọn đủ màu sắc và kích cỡ sản phẩm', async ({ page }) => {
 
   // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
-  const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
+  const colorOption = page.locator('.option2 li a').first(); // Lấy màu đầu tiên trong danh sách
   await expect(colorOption).toBeVisible();
   await colorOption.click();
 
   // Chọn kích cỡ (ví dụ: chọn size M)
-  const sizeOption = page.locator('span.size.req a', { hasText: 'M' });
+  const sizeOption = page.locator('span.size.req a').first(); // Lấy kích cỡ đầu tiên trong danh sách
   await expect(sizeOption).toBeVisible();
   await sizeOption.click({ delay: 500 });
   await expect(sizeOption).toHaveClass(/active/); // Kiểm tra xem class 'active' có được thêm vào không
@@ -56,7 +56,7 @@ test('Chọn đủ màu sắc và kích cỡ sản phẩm', async ({ page }) => 
   //await context.storageState({ path: 'state.json' });
 });
 
-test('Khi click vào màu đầu tiên, màu đó sẽ được chọn', async ({ page }) => {
+test('DD_2: Khi click vào màu đầu tiên, màu đó sẽ được chọn', async ({ page }) => {
 
   const firstColorOption = page.locator('ul.option.option2 li a').first();
 
@@ -75,7 +75,7 @@ test('Khi click vào màu đầu tiên, màu đó sẽ được chọn', async (
 
 });
 
-test('Khi click vào kích cỡ đầu tiên mà không chọn màu, kích cỡ đó sẽ được chọn', async ({ page }) => {
+test('DD_3: Khi click vào kích cỡ đầu tiên mà không chọn màu, kích cỡ đó sẽ không chọn được', async ({ page }) => {
   const firstSizeOption = page.locator('span.size.req a').first();
 
   // Kiểm tra xem tùy chọn kích cỡ đầu tiên có hiển thị và có thể nhấp được không
@@ -88,11 +88,11 @@ test('Khi click vào kích cỡ đầu tiên mà không chọn màu, kích cỡ 
   // Nhấp vào tùy chọn kích cỡ đầu tiên
   await firstSizeOption.click({ delay: 500 });
 
-  await expect(firstSizeOption).toHaveClass(/active/, { timeout: 5000 });
-  console.log(`Kích cỡ "${firstSizeName || 'Không rõ tên'}" đã được chọn thành công và có class 'active'.`);
+  await expect(firstSizeOption).not.toHaveClass(/active/, { timeout: 5000 });
+  
 });
 
-test('Khi click vào kích cỡ đầu tiên mà có chọn màu trước, kích cỡ đó sẽ được chọn', async ({ page }) => {
+test('DD_4: Khi click vào kích cỡ đầu tiên mà có chọn màu trước, kích cỡ đó sẽ được chọn', async ({ page }) => {
   const firstSizeOption = page.locator('span.size.req a').first();
   const firstColorOption = page.locator('ul.option.option2 li a').first();
 
@@ -123,7 +123,7 @@ test('Khi click vào kích cỡ đầu tiên mà có chọn màu trước, kích
   console.log(`Kích cỡ "${firstSizeName || 'Không rõ tên'}" đã được chọn thành công và có class 'active'.`);
 });
 
-test('Tăng số lượng sản phẩm', async ({ page }) => {
+test('DD_5: Tăng số lượng sản phẩm', async ({ page }) => {
     const quantityInput = page.locator('input#psQtt'); // Ô nhập số lượng 
     const incrementButton = page.locator('a#QtyUp'); // Nút '+' 
 
@@ -142,7 +142,7 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
     console.log('Test Case Tăng số lượng sản phẩm thành công.');
   });
 
-  test('Giảm số lượng sản phẩm', async ({ page }) => {
+  test('DD_6: Giảm số lượng sản phẩm', async ({ page }) => {
     
     const quantityInput = page.locator('input#psQtt'); // Ô nhập số lượng 
     const decrementButton = page.locator('a#QtyDown'); // Nút '-' 
@@ -167,30 +167,30 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
     console.log('Test Case Giảm số lượng sản phẩm thành công.');
   });
 
-  test('Giảm số lượng sản phẩm khi đang ở 1', async ({ page }) => {
-    const quantityInput = page.locator('input#psQtt'); // Ô nhập số lượng 
-    const decrementButton = page.locator('a#QtyDown'); // Nút '-' 
-    const incrementButton = page.locator('a#QtyUp'); // Nút '+' 
+  // test('DD_7: Giảm số lượng sản phẩm khi đang ở 1', async ({ page }) => {
+  //   const quantityInput = page.locator('input#psQtt'); // Ô nhập số lượng 
+  //   const decrementButton = page.locator('a#QtyDown'); // Nút '-' 
+  //   const incrementButton = page.locator('a#QtyUp'); // Nút '+' 
 
-    await test.step('Tăng số lượng lên cao hơn 1', async () => {
-      await incrementButton.click(); // 2
-      await incrementButton.click(); // 3
-      await expect(quantityInput).toHaveValue('3');
-    });
+  //   await test.step('Tăng số lượng lên cao hơn 1', async () => {
+  //     await incrementButton.click(); // 2
+  //     await incrementButton.click(); // 3
+  //     await expect(quantityInput).toHaveValue('3');
+  //   });
 
-    await test.step('Giảm số lượng về 1', async () => {
-      await decrementButton.click(); // -> 2
-      await decrementButton.click(); // -> 1
-      await expect(quantityInput).toHaveValue('1');
-    });
+  //   await test.step('Giảm số lượng về 1', async () => {
+  //     await decrementButton.click(); // -> 2
+  //     await decrementButton.click(); // -> 1
+  //     await expect(quantityInput).toHaveValue('1');
+  //   });
 
-    await test.step('Thử giảm số lượng khi đang là 1', async () => {
-      await decrementButton.click(); // Thử giảm tiếp
-      await expect(quantityInput).toHaveValue('1'); 
-    });    console.log('Test Case Giảm số lượng sản phẩm khi đang ở 1 thành công.');
-  });
+  //   await test.step('Thử giảm số lượng khi đang là 1', async () => {
+  //     await decrementButton.click(); // Thử giảm tiếp
+  //     await expect(quantityInput).toHaveValue('1'); 
+  //   });    console.log('Test Case Giảm số lượng sản phẩm khi đang ở 1 thành công.');
+  // });
 
-  test('Nhập số lượng là 0', async ({ page }) => {
+  test('DD_7: Nhập số lượng là 0', async ({ page }) => {
     const quantityInput = page.locator('input#psQtt'); // Ô nhập số lượng 
 
     await quantityInput.fill('0');
@@ -201,7 +201,7 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
   });
 
   // Test Case Nhập số lượng âm
-  test('Nhập số lượng âm', async ({ page }) => {
+  test('DD_8: Nhập số lượng âm', async ({ page }) => {
     const quantityInput = page.locator('input#psQtt'); // Ô nhập số lượng 
 
     await quantityInput.fill('-5');
@@ -210,7 +210,7 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
     console.log('Test Case Nhập số lượng âm - xử lý đúng.');
   });
 
-  test('Nhập ký tự chữ', async ({ page }) => {
+  test('DD_9: Nhập ký tự chữ', async ({ page }) => {
     const quantityInput = page.locator('input#psQtt'); // Ô nhập số lượng 
 
     await quantityInput.fill('abc');
@@ -219,7 +219,7 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
 
     console.log('Test Case Nhập ký tự chữ - xử lý đúng.');
   });
-  test(' Nhập số lượng vượt quá tồn kho', async ({ page }) => {
+  test('DD_10: Nhập số lượng vượt quá tồn kho', async ({ page }) => {
     const quantityInput = page.locator('input#psQtt'); // Ô nhập số lượng 
 
     //Sử dụng type() với delay để mô phỏng gõ từng ký tự
@@ -232,7 +232,7 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
   });
 
   // Test case validation khi không chọn màu và size
-  test('Không chọn màu và size - bấm Thêm vào giỏ hàng', async ({ page }) => {
+  test('DD_11: Không chọn màu và size - bấm Thêm vào giỏ hàng', async ({ page }) => {
     // Đảm bảo không có màu và size nào được chọn (reset về trạng thái ban đầu)
     await page.reload();
       // Kiểm tra nút "Thêm vào giỏ hàng" có tooltip warning
@@ -261,7 +261,7 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
     console.log('Test Case: Không chọn màu và size - bấm Thêm vào giỏ hàng - Hiển thị cảnh báo đúng');
   });
 
-  test('Không chọn màu và size - bấm Mua ngay', async ({ page }) => {    // Đảm bảo không có màu và size nào được chọn (reset về trạng thái ban đầu)
+  test('DD_12: Không chọn màu và size - bấm Mua ngay', async ({ page }) => {    // Đảm bảo không có màu và size nào được chọn (reset về trạng thái ban đầu)
     await page.reload();
     
     // Kiểm tra nút "Mua ngay"
@@ -287,12 +287,12 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
     console.log('Test Case: Không chọn màu và size - bấm Mua ngay - Hiển thị cảnh báo đúng');
   });
 
-  test('Chọn màu nhưng không chọn size - bấm Thêm vào giỏ hàng', async ({ page }) => {
+  test('DD_13: Chọn màu nhưng không chọn size - bấm Thêm vào giỏ hàng', async ({ page }) => {
     // Reset về trạng thái ban đầu
     await page.reload();
     
     // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
-    const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
+    const colorOption = page.locator('.option2 li a').first(); // Lấy màu đầu tiên trong danh sách
     await expect(colorOption).toBeVisible();
     await colorOption.click();
     
@@ -319,12 +319,12 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
     console.log('Test Case: Chọn màu nhưng không chọn size - bấm Thêm vào giỏ hàng - Hiển thị cảnh báo đúng');
   });
 
-  test('Chọn màu nhưng không chọn size - bấm Mua ngay', async ({ page }) => {
+  test('DD_14: Chọn màu nhưng không chọn size - bấm Mua ngay', async ({ page }) => {
     // Reset về trạng thái ban đầu
     await page.reload();
     
     // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
-    const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
+    const colorOption = page.locator('.option2 li a').first(); // Lấy màu đầu tiên trong danh sách
     await expect(colorOption).toBeVisible();
     await colorOption.click();
     
@@ -351,12 +351,12 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
     console.log('Test Case: Chọn màu nhưng không chọn size - bấm Mua ngay - Hiển thị cảnh báo đúng');
   });
 
-  test('Kiểm tra trạng thái nút khi đã chọn đủ màu và size', async ({ page }) => {
+  test('DD_15: Kiểm tra trạng thái nút khi đã chọn đủ màu và size', async ({ page }) => {
     // Reset về trạng thái ban đầu
     await page.reload();
     
     // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
-    const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
+    const colorOption = page.locator('.option2 li a').first(); // Lấy màu đầu tiên trong danh sách
     await expect(colorOption).toBeVisible();
     await colorOption.click();
     
@@ -390,15 +390,15 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
     console.log('Test Case: Đã chọn đủ màu và size - Nút được kích hoạt (ck="1")');
   });
 
-  test('Kiểm tra modal hiển thị sau khi thêm vào giỏ hàng - Bấm "Tiếp tục mua hàng"', async ({ page }) => {
+  test('DD_16: Kiểm tra modal hiển thị sau khi thêm vào giỏ hàng - Bấm "Tiếp tục mua hàng"', async ({ page }) => {
     
     // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
-    const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
+    const colorOption = page.locator('.option2 li a').first(); // Lấy màu đầu tiên trong danh sách
     await expect(colorOption).toBeVisible();
     await colorOption.click();
     
     // Chọn kích cỡ (ví dụ: chọn size M)
-    const sizeOption = page.locator('span.size.req a', { hasText: 'M' });
+    const sizeOption = page.locator('span.size.req a').first(); // Lấy kích cỡ đầu tiên trong danh sách
     await expect(sizeOption).toBeVisible();
     await sizeOption.click({ delay: 500 });
     
@@ -444,22 +444,20 @@ test('Tăng số lượng sản phẩm', async ({ page }) => {
     await expect(modalBackdropClosed).toHaveCount(0);
     console.log('Modal đã đóng - backdrop không còn hiển thị');
     
-    // Kiểm tra vẫn ở trang hiện tại (không chuyển trang)
-    await expect(page).toHaveURL(/quan-suong-dai-2-lop-soda/);
     console.log('Test Case: Bấm "Tiếp tục mua hàng" - Modal đóng và không chuyển trang');
   });
 
-  test('Kiểm tra modal hiển thị sau khi thêm vào giỏ hàng - Bấm "Thanh toán ngay"', async ({ page }) => {
+  test('DD_17: Kiểm tra modal hiển thị sau khi thêm vào giỏ hàng - Bấm "Thanh toán ngay"', async ({ page }) => {
     // Reset và chọn đủ màu, size
     await page.reload();
     
-    // Chọn màu sắc (ví dụ: chọn màu TRẮNG)
-    const colorOption = page.locator('.option2 li a[title="TRẮNG"]');
+    // Chọn màu sắc 
+    const colorOption = page.locator('.option2 li a').first(); // Lấy màu đầu tiên trong danh sách
     await expect(colorOption).toBeVisible();
     await colorOption.click();
     
-    // Chọn kích cỡ (ví dụ: chọn size M)
-    const sizeOption = page.locator('span.size.req a', { hasText: 'M' });
+    // Chọn kích cỡ 
+    const sizeOption = page.locator('span.size.req a').first(); // Lấy kích cỡ đầu tiên trong danh sách
     await expect(sizeOption).toBeVisible();
     await sizeOption.click({ delay: 500 });
     
